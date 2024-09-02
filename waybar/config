@@ -1,1 +1,99 @@
-dsadasdasd
+{
+    "layer": "top",
+    "position": "top",
+    "margin-top": 5,
+    "margin-left": 5,
+    "margin-right": 5,
+    "height": 30,
+    "modules-left": [
+        "clock"
+    ],
+    "modules-center": [
+        "wlr/taskbar"
+    ],
+    "modules-right": [
+        "custom/computer",
+        "custom/sound",
+        "network",
+        "battery"
+    ],
+    "wlr/taskbar": {
+        "format": "{icon}",
+        "on-click-middle": "close",
+        "tooltip-format": "{title}",
+        "ignore-list": [],
+        "on-click": "activate"
+    },
+    "clock": {
+        "format": " {:%H:%M  %d %b %Y} ",
+        "tooltip-format": "<tt><small>{calendar}</small></tt>",
+        "calendar": {
+            "mode": "month",
+            "mode-mon-col": 3,
+            "weeks-pos": "right",
+            "on-scroll": 1,
+            "on-click-right": "mode",
+            "format": {
+                "months": "<span color='#ffead3'><b>{}</b></span>",
+                "days": "<span color='#ecc6d9'><b>{}</b></span>",
+                "weeks": "<span color='#99ffdd'><b>W{}</b></span>",
+                "weekdays": "<span color='#ffcc66'><b>{}</b></span>",
+                "today": "<span color='#ff6699'><b><u>{}</u></b></span>"
+            }
+        },
+        "actions": {
+            "on-click-right": "mode",
+            "on-click-forward": "tz_up",
+            "on-click-backward": "tz_down",
+            "on-scroll-up": "shift_up",
+            "on-scroll-down": "shift_down"
+        }
+    },
+    "battery": {
+        "icon-size": 20,
+        "interval": 30,
+        "format": "{icon}",
+        "format-charging": "<span color='#00bf03'></span>",
+        "format-plugged": "<span color='#00bf03'></span>",
+        "format-icons": [
+            "<span color='#ff1500'>󰂎</span>",
+            "<span color='#fa5502'>󰁺</span>",
+            "<span color='#ff8000'>󰁻</span>",
+            "<span color='#f7a202'>󰁼</span>",
+            "<span color='#fac905'>󰁽</span>",
+            "<span color='#fcec03'>󰁾</span>",
+            "<span color='#e5ff00'>󰁿</span>",
+            "<span color='#bbff00'>󰂀</span>",
+            "<span color='#7ef500'>󰂁</span>",
+            "<span color='#2fff00'>󰂂</span>",
+            "󰁹"
+        ]
+    },
+    "custom/computer": {
+        "format": "{}",
+        "interval": 10,
+        "tooltip": true,
+        "exec": "~/.config/waybar/scripts/comp.py",
+        "return-type": "json"
+    },
+    "custom/sound": {
+        "format": "{}",
+        "interval": 1,
+        "tooltip": true,
+        "exec": "~/.config/waybar/scripts/sound.py",
+        "return-type": "json",
+        "on-click": "~/.config/waybar/scripts/mute.py"
+    },
+    "network": {
+        "interface": "wlp2s0",
+        "format": "󰖟",
+        "format-wifi": "",
+        "format-ethernet": "",
+        "format-disconnected": "󱞐", 
+        "tooltip-format": "{ifname} via {gwaddr} 󰊗",
+        "tooltip-format-wifi": "{essid} ({signalStrength}%) ",
+        "tooltip-format-ethernet": "{ifname} ",
+        "tooltip-format-disconnected": "Disconnected",
+        "max-length": 50
+    }
+}
