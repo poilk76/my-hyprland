@@ -6,7 +6,8 @@
     "margin-right": 5,
     "height": 30,
     "modules-left": [
-        "clock"
+        "clock",
+        "custom/weather"
     ],
     "modules-center": [
         "wlr/taskbar"
@@ -95,5 +96,12 @@
         "tooltip-format-ethernet": "{ifname} ",
         "tooltip-format-disconnected": "Disconnected",
         "max-length": 50
+    },
+    "custom/weather": {
+        "format": "{}",
+        "interval": 1,
+        "tooltip": true,
+        "exec": "~/.config/waybar/scripts/weather.py",
+        "return-type": "json"
     }
 }
