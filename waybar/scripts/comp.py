@@ -9,14 +9,21 @@ def cpu_temp() -> int:
 
     return int(temp[0][:2])
 
+def disk_free():
+
+    data = check_output("df -H /dev/sda2 | grep disk", shell=True, text=True).split("  ")
+
+    return data[3]
+
+
 def cpu_usage() -> float:
 
     cpu = check_output("cat /proc/stat | grep cpu", shell=True, text=True).split("\n")
     cpu = cpu[0].split(" ")
 
-    calc = (int(cpu[2]) / int(cpu[5])) * 100
+    calc = (int(cpu[2]) / int(cpu[5])) * 100.0
 
-    return float(str(calc).split(".")[0]+"."+str(calc).split(".")[1][:1])
+    return calc
 
 def cpu_model() -> str:
 
@@ -35,11 +42,13 @@ def drawing(data:list) -> list:
 
     chars:list = ['╭','╮','╰','╯','─','│']
 
-    result = [" 100% | "," 80 % | "," 60 % | "," 40 % | "," 20 % | "]
+    treasholders = create_treasholders(data)
+
+    result = [f" {str(treasholders[4-i]*1.0)[:4]}% |" for i in range(5)]
 
     for i in range(len(data)-1):
-        position = get_position(data[i])
-        next_position = get_position(data[i+1])
+        position = get_position(data[i], treasholders)
+        next_position = get_position(data[i+1], treasholders)
         result[position] += chars[-2]
         for j in range(5):
             if j != position:
@@ -71,18 +80,29 @@ def drawing(data:list) -> list:
 
     return result
 
-def get_position(val:int) -> int:
+def get_position(val, ref) -> int:
 
-    if val > 80:
+    if val > ref[4]:
         return 0
-    elif val > 60:
+    elif val > ref[3]:
         return 1
-    elif val > 40:
+    elif val > ref[2]:
         return 2
-    elif val > 20:
+    elif val > ref[1]:
         return 3
-    elif val > 0:
+    else:
         return 4
+    
+def create_treasholders(data):
+
+    treasholders = [min(data)]
+
+    calc = (max(data) - min(data)) / 5.0
+
+    for i in range(4):
+        treasholders.append(treasholders[-1]+calc)
+
+    return treasholders
     
 def cpu_data(mem) -> tuple:
     
@@ -90,24 +110,28 @@ def cpu_data(mem) -> tuple:
 
     usage_val = cpu_usage()
 
+    alarm = False
+
+    if cpu_temp() >= 80: alarm = True
+
     data += f' Model:{cpu_model()}  \n'
     data += f' Temperature: {cpu_temp()}°C\n'
-    data += f' Usage:                 {cpu_usage()}%\n'
+    data += f' Usage:                 {str(cpu_usage())[:4]}%\n'
 
     if len(mem["cpu_usage"]) >= 20:
         mem["cpu_usage"].pop(0)
     
-    mem["cpu_usage"].append(int(usage_val))
+    mem["cpu_usage"].append(usage_val)
 
     for line in drawing(mem["cpu_usage"]):
         data += line
 
 
-    return (data,mem)
+    return (data,mem,alarm)
 
 def ram_data(mem) -> tuple:
 
-    data = "RAM stats:\n"
+    data = "\nRAM stats:\n"
 
     usage = ram_usage()
 
@@ -123,6 +147,14 @@ def ram_data(mem) -> tuple:
     
     return (data,mem)
 
+def disk_data():
+
+    data = "\nDISK stats:\n"
+
+    data += f" Free: {disk_free()} "
+
+    return data
+
 def main() -> dict:
     
     data:dict = {"text":"󰍹","tooltip":""}
@@ -134,8 +166,11 @@ def main() -> dict:
     ram = ram_data(mem)
     data["tooltip"] += cpu[0]
     mem = cpu[1]
+    if cpu[2]: data["text"] = "<span color='#ff1500'>󰍹</span>"
     data["tooltip"] += ram[0]
     mem = ram[1]
+    data["tooltip"] += disk_data()
+    data["tooltip"] = data['tooltip'][:-1]
 
     with open("/home/main/.config/waybar/scripts/mem.json", 'w') as f:
         f.write(dumps(mem))
